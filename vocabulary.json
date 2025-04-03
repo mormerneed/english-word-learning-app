@@ -1,0 +1,8 @@
+{
+    "Travel": ["journey", "destination", "passport", "sightseeing"],
+    "Technology": ["algorithm", "AI", "machine learning", "robotics"],
+    "Food": ["ingredient", "recipe", "flavor", "cooking"],
+    "Sports": ["stadium", "tournament", "player", "team"],
+    "Music": ["melody", "instrument", "song", "composer"]
+  }
+  
