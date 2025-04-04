@@ -1,4 +1,4 @@
-import { getTodayStats, prisma } from '@/lib/db'
+import { getTodayStats, prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -46,10 +46,8 @@ export async function POST(request: Request) {
     // 更新或创建今日统计
     const stats = await prisma.dailyStat.upsert({
       where: {
-        userId_date: {
-          userId: 1, // 暂时使用测试用户ID
-          date: today
-        }
+        userId: 1, // 暂时使用测试用户ID
+        date: today
       },
       update: {
         wordsLearned,

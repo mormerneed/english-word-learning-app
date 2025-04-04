@@ -1,0 +1,20 @@
+1.在components文件夹下写可重用的组件：progresscard.tsx
+2。src/lib 目录通常用于存放一些通用的工具函数、配置文件和核心逻辑。在你的项目中，src/lib 目录应该包含以下类型的文件：
+数据库相关：
+prisma.ts - Prisma 客户端实例
+db.ts - 数据库操作函数（如果与 prisma.ts 分开的话）
+工具函数：
+utils.ts - 通用工具函数
+helpers.ts - 辅助函数
+配置相关：
+config.ts - 应用配置
+constants.ts - 常量定义
+类型定义：
+types.ts - TypeScript 类型定义
+interfaces.ts - 接口定义
+认证相关：
+auth.ts - 认证相关函数
+jwt.ts - JWT 相关操作
+API 相关：
+api.ts - API 请求封装
+fetcher.ts - 数据获取函数

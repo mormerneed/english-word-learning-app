@@ -1,9 +1,15 @@
 "use client";
+import dynamic from 'next/dynamic';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import ProgressCard from "@/components/ProgressCard";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+// 动态导入 ProgressCard 组件，禁用 SSR
+const ProgressCard = dynamic(() => import('@/components/ProgressCard'), {
+  ssr: false,
+  loading: () => <div className="text-center text-white">加载中...</div>
+});
 
 interface ProgressData {
   todayLearned: number;
@@ -27,7 +33,9 @@ export default function Home() {
   useEffect(() => {
     async function fetchProgress() {
       try {
-        const response = await fetch('/api/progress');
+        const response = await fetch('/api/progress', {
+          credentials: 'include'
+        });
         if (response.status === 401) {
           router.push('/login');
           return;
@@ -50,6 +58,7 @@ export default function Home() {
     try {
       await fetch('/api/auth/logout', {
         method: 'POST',
+        credentials: 'include'
       });
       router.push('/login');
     } catch (error) {

@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  passwordHash  String
+  username      String    @unique
+  createdAt     DateTime  @default(now())
+  lastLogin     DateTime?
+  points        Int       @default(0)
+  streakDays    Int       @default(0)
+  dailyStats    DailyStat[]
+  learningRecords LearningRecord[]
+}
+
+model DailyStat {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  date          DateTime
+  wordsLearned  Int       @default(0)
+  wordsReviewed Int       @default(0)
+  accuracy      Float     @default(0)
+  studyTime     Int       @default(0)
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+}
+
+model Word {
+  id          Int       @id @default(autoincrement())
+  english     String
+  chinese     String
+  example     String?
+  difficulty  Int       @default(1)
+  category    String?
+  createdAt   DateTime  @default(now())
+  learningRecords LearningRecord[]
+}
+
+model LearningRecord {
+  id            Int       @id @default(autoincrement())
+  userId        Int
+  wordId        Int
+  status        String    // 'learning', 'reviewing', 'mastered'
+  lastReviewed  DateTime?
+  nextReview    DateTime?
+  reviewCount   Int       @default(0)
+  correctCount  Int       @default(0)
+  user          User      @relation(fields: [userId], references: [id])
+  word          Word      @relation(fields: [wordId], references: [id])
+
+  @@unique([userId, wordId])
+} 
