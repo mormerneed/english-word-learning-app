@@ -1,6 +1,6 @@
 module.exports = {
 
-"[project]/.next-internal/server/app/api/auth/login/route/actions.js [app-rsc] (server actions loader, ecmascript)": (function(__turbopack_context__) {
+"[project]/.next-internal/server/app/api/profile/route/actions.js [app-rsc] (server actions loader, ecmascript)": (function(__turbopack_context__) {
 
 var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
 {
@@ -90,14 +90,6 @@ async function getTodayStats(userId) {
     });
 }
 }}),
-"[externals]/crypto [external] (crypto, cjs)": (function(__turbopack_context__) {
-
-var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
-{
-const mod = __turbopack_context__.x("crypto", () => require("crypto"));
-
-module.exports = mod;
-}}),
 "[externals]/buffer [external] (buffer, cjs)": (function(__turbopack_context__) {
 
 var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
@@ -122,101 +114,114 @@ const mod = __turbopack_context__.x("util", () => require("util"));
 
 module.exports = mod;
 }}),
-"[project]/src/app/api/auth/login/route.ts [app-route] (ecmascript)": ((__turbopack_context__) => {
+"[externals]/crypto [external] (crypto, cjs)": (function(__turbopack_context__) {
+
+var { g: global, __dirname, m: module, e: exports } = __turbopack_context__;
+{
+const mod = __turbopack_context__.x("crypto", () => require("crypto"));
+
+module.exports = mod;
+}}),
+"[project]/src/lib/auth.ts [app-route] (ecmascript)": ((__turbopack_context__) => {
 "use strict";
 
 var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({
-    "POST": (()=>POST)
+    "getToken": (()=>getToken)
+});
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$jsonwebtoken$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/jsonwebtoken/index.js [app-route] (ecmascript)");
+;
+async function getToken(request) {
+    try {
+        const token = request.cookies.get('token')?.value;
+        if (!token) return null;
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error('JWT_SECRET 未设置');
+            return null;
+        }
+        const decoded = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$jsonwebtoken$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].verify(token, secret);
+        return decoded;
+    } catch (error) {
+        console.error('Token 验证失败:', error);
+        return null;
+    }
+}
+}}),
+"[project]/src/app/api/profile/route.ts [app-route] (ecmascript)": ((__turbopack_context__) => {
+"use strict";
+
+var { g: global, __dirname } = __turbopack_context__;
+{
+__turbopack_context__.s({
+    "GET": (()=>GET)
 });
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/server.js [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/prisma.ts [app-route] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$bcryptjs$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/bcryptjs/index.js [app-route] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$jsonwebtoken$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/jsonwebtoken/index.js [app-route] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/auth.ts [app-route] (ecmascript)");
 ;
 ;
 ;
-;
-async function POST(request) {
+async function GET(request) {
     try {
-        // 检查环境变量
-        if (!process.env.JWT_SECRET) {
-            console.error('JWT_SECRET 未设置');
+        const token = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$auth$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getToken"])(request);
+        if (!token) {
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-                error: '服务器配置错误'
+                error: '未授权'
             }, {
-                status: 500
+                status: 401
             });
         }
-        // 解析请求体
-        let body;
-        try {
-            body = await request.json();
-        } catch (error) {
-            console.error('解析请求体失败:', error);
-            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-                error: '无效的请求格式'
-            }, {
-                status: 400
-            });
-        }
-        const { email, password } = body;
-        console.log('登录请求:', email);
-        // 验证用户
+        // 获取用户信息
         const user = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].user.findUnique({
             where: {
-                email
+                id: token.userId
+            },
+            select: {
+                username: true,
+                email: true,
+                points: true,
+                streakDays: true
             }
         });
         if (!user) {
-            console.log('用户不存在');
             return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-                error: '邮箱或密码错误'
+                error: '用户不存在'
             }, {
-                status: 401
+                status: 404
             });
         }
-        const isValid = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$bcryptjs$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].compare(password, user.passwordHash);
-        if (!isValid) {
-            console.log('密码错误');
-            return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-                error: '邮箱或密码错误'
-            }, {
-                status: 401
-            });
-        }
-        // 生成 JWT token
-        const token = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$jsonwebtoken$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].sign({
-            userId: user.id
-        }, process.env.JWT_SECRET, {
-            expiresIn: '7d'
-        });
-        // 创建响应
-        const response = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-            user: {
-                id: user.id,
-                email: user.email,
-                username: user.username
+        // 获取学习统计
+        const stats = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].dailyStat.aggregate({
+            where: {
+                userId: token.userId
+            },
+            _sum: {
+                wordsLearned: true,
+                studyTime: true
+            },
+            _avg: {
+                accuracy: true
             }
-        }, {
-            status: 200
         });
-        // 设置 cookie
-        response.cookies.set({
-            name: 'token',
-            value: token,
-            httpOnly: true,
-            secure: ("TURBOPACK compile-time value", "development") === 'production',
-            sameSite: 'strict',
-            maxAge: 60 * 60 * 24 * 7 // 7天
+        // 获取已学单词总数
+        const totalWords = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$prisma$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["prisma"].learningRecord.count({
+            where: {
+                userId: token.userId,
+                status: 'LEARNED'
+            }
         });
-        console.log('登录成功，设置 cookie');
-        return response;
-    } catch (error) {
-        console.error('登录错误:', error);
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-            error: '登录失败'
+            ...user,
+            totalWords,
+            totalStudyTime: stats._sum.studyTime || 0,
+            accuracy: (stats._avg.accuracy || 0) * 100
+        });
+    } catch (error) {
+        console.error('获取用户信息失败:', error);
+        return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+            error: '获取用户信息失败'
         }, {
             status: 500
         });
@@ -226,4 +231,4 @@ async function POST(request) {
 
 };
 
-//# sourceMappingURL=%5Broot%20of%20the%20server%5D__27a3c63f._.js.map
+//# sourceMappingURL=%5Broot%20of%20the%20server%5D__54b3c7bb._.js.map

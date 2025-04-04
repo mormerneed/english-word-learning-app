@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 6, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 60, "column": 0}, "map": {"version":3,"sources":["file://G%3A/english-word-learning-app/src/app/api/auth/logout/route.ts"],"sourcesContent":["import { NextResponse } from 'next/server'\r\n\r\nexport async function POST() {\r\n  const response = NextResponse.json({ message: '登出成功' })\r\n  response.cookies.delete('token')\r\n  return response\r\n} "],"names":[],"mappings":";;;AAAA;;AAEO,eAAe;IACpB,MAAM,WAAW,gIAAA,CAAA,eAAY,CAAC,IAAI,CAAC;QAAE,SAAS;IAAO;IACrD,SAAS,OAAO,CAAC,MAAM,CAAC;IACxB,OAAO;AACT","debugId":null}}]
+}
