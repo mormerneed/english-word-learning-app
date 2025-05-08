@@ -1,25 +1,30 @@
-import { NextRequest } from 'next/server'
 import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs'
 
-interface TokenPayload {
-  userId: number
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+
+// 生成JWT令牌
+export async function generateToken(userId: number): Promise<string> {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' })
 }
 
-export async function getToken(request: NextRequest): Promise<TokenPayload | null> {
+// 验证JWT令牌
+export async function verifyToken(token: string): Promise<number | null> {
   try {
-    const token = request.cookies.get('token')?.value
-    if (!token) return null
-
-    const secret = process.env.JWT_SECRET
-    if (!secret) {
-      console.error('JWT_SECRET 未设置')
-      return null
-    }
-
-    const decoded = jwt.verify(token, secret) as TokenPayload
-    return decoded
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: number }
+    return decoded.userId
   } catch (error) {
-    console.error('Token 验证失败:', error)
+    console.error('令牌验证失败:', error)
     return null
   }
+}
+
+// 加密密码
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10)
+}
+
+// 验证密码
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  return bcrypt.compare(password, hashedPassword)
 } 

@@ -1,9 +1,0 @@
-{
-  "[project]/src/components/ProgressCard.tsx [app-client] (ecmascript, next/dynamic entry)": {
-    "id": "[project]/src/components/ProgressCard.tsx [app-client] (ecmascript, next/dynamic entry)",
-    "files": [
-      "static/chunks/src_components_ProgressCard_tsx_7da340e5._.js",
-      "static/chunks/src_components_ProgressCard_tsx_a93e60ec._.js"
-    ]
-  }
-}

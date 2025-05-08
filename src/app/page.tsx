@@ -1,111 +1,119 @@
 "use client";
-import dynamic from 'next/dynamic';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-// 动态导入 ProgressCard 组件，禁用 SSR
-const ProgressCard = dynamic(() => import('@/components/ProgressCard'), {
-  ssr: false,
-  loading: () => <div className="text-center text-white">加载中...</div>
-});
-
-interface ProgressData {
-  todayLearned: number;
-  todayGoal: number;
-  streakDays: number;
-  totalWords: number;
-  reviewWords: number;
-  accuracy: number;
+interface User {
+  id: number;
+  email: string;
+  username: string;
 }
 
 export default function Home() {
   const router = useRouter();
-  const [progressData, setProgressData] = useState<ProgressData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
-
+  
+  // 获取用户信息
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    async function fetchProgress() {
-      try {
-        const response = await fetch('/api/progress', {
-          credentials: 'include'
-        });
-        if (response.status === 401) {
-          router.push('/login');
-          return;
+    if (typeof window !== 'undefined') {
+      const userDataStr = localStorage.getItem('userData');
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          setUser(userData);
+        } catch (e) {
+          console.error('解析用户数据出错', e);
         }
-        const data = await response.json();
-        setProgressData(data);
-      } catch (error) {
-        console.error('获取进度数据失败:', error);
-      } finally {
-        setLoading(false);
       }
+      setLoading(false);
     }
-
-    if (mounted) {
-      fetchProgress();
-    }
-  }, [router, mounted]);
-
+  }, []);
+  
+  // 处理登出
   const handleLogout = async () => {
     try {
+      // 调用登出API清除服务器端cookie
       await fetch('/api/auth/logout', {
         method: 'POST',
-        credentials: 'include'
       });
+      
+      // 清除客户端存储
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+      }
+      
       router.push('/login');
     } catch (error) {
-      console.error('登出失败:', error);
+      console.error('登出错误:', error);
+      // 即使API调用失败，也清除本地存储并重定向
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+      }
+      router.push('/login');
     }
   };
 
-  if (!mounted) {
-    return null;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
+        <span className="ml-2">加载中...</span>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 p-6">
       <div className="w-full max-w-md space-y-6">
-        <Card className="w-full text-center shadow-xl bg-white rounded-2xl p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-bold text-gray-800">AI 单词学习助手</h1>
-            <Button onClick={handleLogout} variant="outline" className="text-sm">
-              退出登录
-            </Button>
+        <div className="bg-white rounded-lg shadow-xl p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-blue-600">AI 单词学习助手</h1>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              登出
+            </button>
           </div>
-          <p className="mt-2 text-gray-600">选择一个功能开始学习：</p>
-
-          <CardContent className="mt-6 flex flex-col gap-4">
-            <Button asChild className="w-full bg-blue-500 hover:bg-blue-600">
-              <a href="/review">📖 单词复习</a>
-            </Button>
-            <Button asChild className="w-full bg-green-500 hover:bg-green-600">
-              <a href="/chat">💬 AI 对话</a>
-            </Button>
-            <Button asChild className="w-full bg-yellow-500 hover:bg-yellow-600">
-              <a href="/tasks">🎯 每日任务</a>
-            </Button>
-            <Button asChild className="w-full bg-purple-500 hover:bg-purple-600">
-              <a href="/profile">👤 个人中心</a>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* 添加进度卡片 */}
-        {loading ? (
-          <div className="text-center text-white">加载中...</div>
-        ) : progressData ? (
-          <ProgressCard data={progressData} />
-        ) : (
-          <div className="text-center text-white">暂无数据</div>
-        )}
+          
+          {user && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h2 className="text-xl font-semibold mb-2">欢迎回来, {user.username}!</h2>
+              <p className="text-gray-600">{user.email}</p>
+            </div>
+          )}
+          
+          <p className="text-gray-700 mb-6">选择一个功能开始学习：</p>
+          
+          <div className="grid grid-cols-1 gap-4">
+            <a
+              href="/review"
+              className="block w-full text-center px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
+              📖 单词复习
+            </a>
+            <a
+              href="/chat"
+              className="block w-full text-center px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+            >
+              💬 AI 对话
+            </a>
+            <a
+              href="/tasks"
+              className="block w-full text-center px-4 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
+            >
+              🎯 每日任务
+            </a>
+            <a
+              href="/profile"
+              className="block w-full text-center px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition"
+            >
+              👤 个人中心
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );
